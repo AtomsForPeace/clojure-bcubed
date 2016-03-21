@@ -1,10 +1,7 @@
 # clojure-bcubed
 
-A Clojure library designed to ... well, that part is up to you.
-
-## Usage
-
-FIXME
+A Clojure library designed to implement the b-cubed algorithm.
+Inspired by:  https://github.com/hhromic/python-bcubed
 
 ## License
 

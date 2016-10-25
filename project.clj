@@ -7,5 +7,7 @@
     [org.clojure/clojure "1.8.0"]
     [org.clojure/tools.logging "0.3.1"]
     [org.clojure/tools.cli "0.3.3"]
-    [org.clojure/data.json "0.2.6"]]
+    [org.clojure/data.json "0.2.6"]
+    [org.clojure/math.combinatorics "0.1.3"]
+  ]
   :main clojure-bcubed.core)

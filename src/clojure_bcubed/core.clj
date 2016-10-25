@@ -2,7 +2,8 @@
     (:require
         [clojure.set :as set]
         [clojure.tools.logging :as log]
-        [clojure.data.json :as json])
+        [clojure.data.json :as json]
+        [clojure.math.combinatorics :as combo])
     (:use clojure.contrib.command-line)
     (:gen-class))
 
@@ -18,13 +19,14 @@
 
 (defn multi-recall [dict1 dict2]
     (log/info "Starting recall")
-    (for [keyval1 dict1 keyval2 dict1]
-        (do (let [di2el1 (set (dict2 (key keyval1)))
-                  di2el2 (set (dict2 (key keyval2)))]
-            (if (set/intersection di2el1 di2el2)
-                (let [di1el1 (set (dict1 (key keyval1)))
-                      di1el2 (set (dict1 (key keyval2)))]
-                (recall di1el1 di1el2 di2el1 di2el2)))))))
+    (average recall (filter set/intersection (combo/subsets (keys dict1)))
+    ; (for [keyval1 dict1 keyval2 dict1]
+    ;     (do (let [di2el1 (set (dict2 (key keyval1)))
+    ;               di2el2 (set (dict2 (key keyval2)))]
+    ;         (if (set/intersection di2el1 di2el2)
+    ;             (let [di1el1 (set (dict1 (key keyval1)))
+    ;                   di1el2 (set (dict1 (key keyval2)))]
+    ;             (recall di1el1 di1el2 di2el1 di2el2)))))))
 
 (defn precision [set1_1 set1_2 set2_1 set2_2]
     (float (/ (min (float (count (set/intersection set1_1 set1_2)))

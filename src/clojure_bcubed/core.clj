@@ -11,39 +11,79 @@
 
 (defn average [numbers] (/ (apply + numbers) (count numbers)))
 
-(defn recall [set1_1 set1_2 set2_1 set2_2]
-    (float (/ (min (float (count (set/intersection set1_1 set1_2)))
-                   (float (count (set/intersection set2_1 set2_2))))
-              (float (count (set/intersection set2_1 set2_2))))))
-
-(defn multi-recall [ldict cdict]
-  (filter
-    (fn [l] (not= #{} (set/intersection (ldict (first l)) (ldict (last l)))))
-    (combo/selections (keys cdict) 2)
+(defn multi-recall [categories clusters el1 el2]
+  (let
+    [
+      clusters-intersection (count (set/intersection (clusters el1) (clusters el2)))
+      categories-intersection (count (set/intersection (categories el1) (categories el2)))
+    ]
+    (float (/ (min clusters-intersection categories-intersection)
+              categories-intersection))
   )
-    (average recall (filter (fn [l] (set/intersection (ldict (first l)) (ldict (last l)) (combo/selections (keys cdict)))))
-    ; (for [keyval1 dict1 keyval2 dict1]
-    ;     (do (let [di2el1 (set (dict2 (key keyval1)))
-    ;               di2el2 (set (dict2 (key keyval2)))]
-    ;         (if (set/intersection di2el1 di2el2)
-    ;             (let [di1el1 (set (dict1 (key keyval1)))
-    ;                   di1el2 (set (dict1 (key keyval2)))]
-    ;             (recall di1el1 di1el2 di2el1 di2el2)))))))
+)
 
-(defn precision [set1_1 set1_2 set2_1 set2_2]
-    (float (/ (min (float (count (set/intersection set1_1 set1_2)))
-                   (float (count (set/intersection set2_1 set2_2))))
-              (float (count (set/intersection set1_1 set1_2))))))
+(defn recall [categories clusters]
+  (log/info "Starting recall")
+  (average
+    (map
+      (partial apply (partial multi-recall categories clusters))
+      (filter
+        (partial apply (fn [el1 el2] (not= #{} (set/intersection (categories el1) (categories el2)))))
+        (combo/selections (keys clusters) 2)
+      )
+    )
+  )
+)
 
-(defn multi-precision [dict1 dict2]
-    (log/info "Starting precision")
-    (for [keyval1 dict1 keyval2 dict1]
-        (do (let [di1el1 (set (dict1 (key keyval1)))
-                  di1el2 (set (dict1 (key keyval2)))]
-            (if (set/intersection di1el1 di1el2)
-                (let [di2el1 (set (dict2 (key keyval1)))
-                      di2el2 (set (dict2 (key keyval2)))]
-                (precision di1el1 di1el2 di2el1 di2el2)))))))
+(defn recall-sensible [categories clusters]
+  (log/info "Starting recall-sensible")
+  (average
+    (map
+      (partial apply (partial multi-recall categories clusters))
+      (filter
+        (partial apply (fn [el1 el2] (not= #{} (set/intersection (categories el1) (categories el2)))))
+        (combo/combinations (keys clusters) 2)
+      )
+    )
+  )
+)
+
+(defn multi-precision [categories clusters el1 el2]
+  (let
+    [
+      clusters-intersection (count (set/intersection (clusters el1) (clusters el2)))
+      categories-intersection (count (set/intersection (categories el1) (categories el2)))
+    ]
+    (float (/ (min clusters-intersection categories-intersection)
+              clusters-intersection))
+  )
+)
+
+(defn precision [categories clusters]
+  (log/info "Starting precision")
+  (average
+    (map
+      (partial apply (partial multi-precision categories clusters))
+      (filter
+        (partial apply (fn [el1 el2] (not= #{} (set/intersection (clusters el1) (clusters el2)))))
+        (combo/selections (keys clusters) 2)
+      )
+    )
+  )
+)
+
+(defn precision-sensible [categories clusters]
+  (log/info "Starting precision-sensible")
+  (average
+    (map
+      (partial apply (partial multi-precision categories clusters))
+      (filter
+        (partial apply (fn [el1 el2] (not= #{} (set/intersection (clusters el1) (clusters el2)))))
+        (combo/combinations (keys clusters) 2)
+      )
+    )
+  )
+)
 
 (defn -main [& args]
   true

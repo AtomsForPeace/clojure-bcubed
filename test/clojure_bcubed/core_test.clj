@@ -18,3 +18,10 @@
 (deftest test-precision)
 
 (deftest test-precision-sensible)
+
+(deftest test-vals-to-sets
+  (is (= { :a #{}, :b #{}, :c #{}, :d #{1}, :e #{1 2}, :f #{3 4} }
+         (vals-to-sets { :a (), :b [], :c nil, :d '(1) :e '(1 2), :f [3 4] })
+  ))
+  (is (= {} (vals-to-sets {})))
+)

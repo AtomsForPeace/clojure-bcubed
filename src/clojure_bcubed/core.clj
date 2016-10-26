@@ -28,7 +28,7 @@
     (map
       (partial apply (partial multi-recall categories clusters))
       (filter
-        (partial apply (fn [el1 el2] (not= #{} (set/intersection (categories el1) (categories el2)))))
+        (partial apply (fn [el1 el2] (seq (set/intersection (categories el1) (categories el2)))))
         (combo/selections (keys clusters) 2)
       )
     )
@@ -41,7 +41,7 @@
     (map
       (partial apply (partial multi-recall categories clusters))
       (filter
-        (partial apply (fn [el1 el2] (not= #{} (set/intersection (categories el1) (categories el2)))))
+        (partial apply (fn [el1 el2] (seq (set/intersection (categories el1) (categories el2)))))
         (combo/combinations (keys clusters) 2)
       )
     )
@@ -65,7 +65,7 @@
     (map
       (partial apply (partial multi-precision categories clusters))
       (filter
-        (partial apply (fn [el1 el2] (not= #{} (set/intersection (clusters el1) (clusters el2)))))
+        (partial apply (fn [el1 el2] (seq (set/intersection (clusters el1) (clusters el2)))))
         (combo/selections (keys clusters) 2)
       )
     )
@@ -78,7 +78,7 @@
     (map
       (partial apply (partial multi-precision categories clusters))
       (filter
-        (partial apply (fn [el1 el2] (not= #{} (set/intersection (clusters el1) (clusters el2)))))
+        (partial apply (fn [el1 el2] (seq (set/intersection (clusters el1) (clusters el2)))))
         (combo/combinations (keys clusters) 2)
       )
     )

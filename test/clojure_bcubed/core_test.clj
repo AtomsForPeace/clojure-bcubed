@@ -29,7 +29,8 @@
 )
 
 (deftest test-multi-recall
-  
+  (is (= 1.0 (multi-recall categories clusters :item2 :item3)))
+  (is (= 1.0 (multi-recall categories clusters :item1 :item4)))
 )
 
 (deftest test-recall
@@ -41,7 +42,8 @@
 )
 
 (deftest test-multi-precision
-  
+  (is (= 1.0 (multi-precision categories clusters :item2 :item3)))
+  (is (= 0.0 (multi-precision categories clusters :item2 :item5)))
 )
 
 (deftest test-precision

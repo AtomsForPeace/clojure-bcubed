@@ -9,7 +9,18 @@
 ; (def original {:hi [2 3 4] :bye [6 7 8 9]})
 ; (def modified {:hi [1 2 3] :bye [4 5 6]})
 
-(defn average [numbers] (/ (apply + numbers) (count numbers)))
+(defn average [numbers]
+  (let
+    [
+      result (reduce
+        (fn [ [total acc] number] [(inc total) (+ acc number)])
+        [0 0]
+        numbers
+      )
+    ]
+    (/ (result 1) (result 0))
+  )
+)
 
 (defn multi-recall [categories clusters el1 el2]
   (let

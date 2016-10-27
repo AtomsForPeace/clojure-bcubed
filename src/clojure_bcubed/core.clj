@@ -91,8 +91,6 @@
   (log/info "Starting up")
   (def original (vals-to-sets (json/read-str (slurp (first args)))))
   (def modified (vals-to-sets (json/read-str (slurp (last args)))))
-  (log/info "original: " original)
-  (log/info "modified: " modified)
   (log/info "Number of clusters: " (count original))
   (log/info (recall original modified))
   (log/info (precision original modified))

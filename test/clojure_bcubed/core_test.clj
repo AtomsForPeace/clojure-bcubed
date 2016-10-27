@@ -2,9 +2,10 @@
   (:require [clojure.test :refer :all]
             [clojure-bcubed.core :refer :all]))
 
-(deftest test-average
-  (is (= 2 (average [2 2])))
-  (is (= 5/2 (average [1 2 3 4])))
+(deftest test-averager
+  (is (= 2  (transduce identity averager (range 5))))
+  (is (= 9/2 (transduce identity averager (range 10))))
+  (is (= 6172  (transduce identity averager (range 12345))))
 )
 
 (deftest test-multi-recall)

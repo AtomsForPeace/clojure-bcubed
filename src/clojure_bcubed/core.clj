@@ -6,9 +6,6 @@
         [clojure.math.combinatorics :as combo])
     (:gen-class))
 
-; (def original {:hi [2 3 4] :bye [6 7 8 9]})
-; (def modified {:hi [1 2 3] :bye [4 5 6]})
-
 (defn average [numbers]
   (let
     [
@@ -19,6 +16,23 @@
       )
     ]
     (/ (result 1) (result 0))
+  )
+)
+
+; better way(?): build averager as reducing function using an atom to keep state
+(defn averager
+  (
+    []
+    (atom { :sum 0, :n 0 })
+  )
+  (
+    [state]
+    (/ (@state :sum) (@state :n))
+  )
+  (
+    [state number]
+    ; there is probably a more idiomatic way to do this
+    (reset! state (atom { :sum (+ number (@state :sum)), :n (inc (@state :n)) }))
   )
 )
 
@@ -33,17 +47,20 @@
   )
 )
 
+; transducer that takes pairs of elements, filters out those whose categories have non-empty
+; intersection and maps those through multi-recall
+(defn recall-xform [categories clusters]
+  (comp
+    (filter (partial apply (fn [el1 el2] (seq (set/intersection (categories el1) (categories el2))))))
+    (map (partial apply (partial multi-recall categories clusters)))
+  )
+)
+
+; the power of Clojure: apply the recall transducer to the index pairs, using averager
+; as the reducing function
 (defn recall [categories clusters]
   (log/info "Starting recall")
-  (average
-    (map
-      (partial apply (partial multi-recall categories clusters))
-      (filter
-        (partial apply (fn [el1 el2] (seq (set/intersection (categories el1) (categories el2)))))
-        (combo/selections (keys clusters) 2)
-      )
-    )
-  )
+  (transduce (recall-xform categories clusters) averager (combo/selections (keys clusters) 2))
 )
 
 (defn recall-sensible [categories clusters]

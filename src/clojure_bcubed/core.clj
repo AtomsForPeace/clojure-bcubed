@@ -18,8 +18,7 @@
   )
   (
     [state number]
-    ; there is probably a more idiomatic way to do this
-    (reset! state (atom { :sum (+ number (@state :sum)), :n (inc (@state :n)) }))
+    (atom (swap! state #(-> { :sum (+ number (% :sum)), :n (inc (% :n)) })))
   )
 )
 

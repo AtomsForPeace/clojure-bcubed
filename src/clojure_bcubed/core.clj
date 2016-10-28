@@ -6,19 +6,24 @@
         [clojure.math.combinatorics :as combo])
     (:gen-class))
 
+(def state (atom { :sum 0, :n 0 }))
+
 ; better way(?): build averager as reducing function using an atom to keep state
-(defn averager
-  (
-    []
-    (atom { :sum 0, :n 0 })
-  )
-  (
-    [state]
-    (/ (@state :sum) (@state :n))
-  )
-  (
-    [state number]
-    (atom (swap! state #(-> { :sum (+ number (% :sum)), :n (inc (% :n)) })))
+(defn averager-factory []
+  (fn
+    (
+      []
+      (atom { :sum 0, :n 0 })
+    )
+    (
+      [state]
+      ;(/ (@state :sum) (@state :n))
+      @state
+    )
+    (
+      [state number]
+      (atom (swap! state #(-> { :sum (+ number (% :sum)), :n (inc (% :n)) })))
+    )
   )
 )
 
@@ -64,23 +69,28 @@
 ; as the reducing function
 (defn recall [categories clusters]
   (log/info "Starting recall")
-  (transduce (recall-xform categories clusters) averager (combo/selections (keys clusters) 2))
+  (let [
+    averager (averager-factory)
+    result (reduce (fn [x y] { :sum (+ (x :sum) (y :sum)), :n (+ (x :n) (y :n)) }) (pmap (partial transduce (recall-xform categories clusters) averager) (partition-all 10000 (combo/selections (keys clusters) 2))))
+    ]
+    (/ (result :sum) (result :n))
+  )
 )
 
-(defn recall-sensible [categories clusters]
-  (log/info "Starting recall-sensible")
-  (transduce (recall-xform categories clusters) averager (combo/combinations (keys clusters) 2))
-)
-
-(defn precision [categories clusters]
-  (log/info "Starting precision")
-  (transduce (precision-xform categories clusters) averager (combo/selections (keys clusters) 2))
-)
-
-(defn precision-sensible [categories clusters]
-  (log/info "Starting precision-sensible")
-  (transduce (precision-xform categories clusters) averager (combo/combinations (keys clusters) 2))
-)
+; (defn recall-sensible [categories clusters]
+;   (log/info "Starting recall-sensible")
+;   (transduce (recall-xform categories clusters) averager (combo/combinations (keys clusters) 2))
+; )
+;
+; (defn precision [categories clusters]
+;   (log/info "Starting precision")
+;   (transduce (precision-xform categories clusters) averager (combo/selections (keys clusters) 2))
+; )
+;
+; (defn precision-sensible [categories clusters]
+;   (log/info "Starting precision-sensible")
+;   (transduce (precision-xform categories clusters) averager (combo/combinations (keys clusters) 2))
+; )
 
 (defn vals-to-sets [dict]
   (zipmap (keys dict) (map set (vals dict)))
@@ -91,6 +101,8 @@
   (def original (vals-to-sets (json/read-str (slurp (first args)))))
   (def modified (vals-to-sets (json/read-str (slurp (last args)))))
   (log/info "Number of clusters: " (count original))
-  (log/info (recall original modified))
-  (log/info (precision original modified))
+  (log/info (time (recall original modified)))
+  (log/info "Finished recall")
+  ; (log/info (precision original modified))
+  (shutdown-agents)
 )

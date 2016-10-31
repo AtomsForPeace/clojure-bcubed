@@ -13,16 +13,16 @@
   (fn
     (
       []
-      (atom { :sum 0, :n 0 })
+      [0 0]
     )
     (
       [state]
       ;(/ (@state :sum) (@state :n))
-      @state
+      state
     )
     (
-      [state number]
-      (atom (swap! state #(-> { :sum (+ number (% :sum)), :n (inc (% :n)) })))
+      [[sum n] number]
+      [ (+ sum number) (inc n) ]
     )
   )
 )
@@ -70,10 +70,11 @@
 (defn recall [categories clusters]
   (log/info "Starting recall")
   (let [
-    averager (averager-factory)
-    result (reduce (fn [x y] { :sum (+ (x :sum) (y :sum)), :n (+ (x :n) (y :n)) }) (pmap (partial transduce (recall-xform categories clusters) averager) (partition-all 10000 (combo/selections (keys clusters) 2))))
+    partitions (partition-all 10000 (combo/selections (keys clusters) 2))
+    transducer (partial transduce (recall-xform categories clusters) (averager-factory))
+    result (apply mapv + (pmap transducer partitions))
     ]
-    (/ (result :sum) (result :n))
+    (/ (first result) (second result))
   )
 )
 

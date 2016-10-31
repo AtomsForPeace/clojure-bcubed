@@ -60,8 +60,8 @@
 
 (defn precision-xform [categories clusters]
   (comp
-    (filter (partial apply (fn [el1 el2] (seq (set/intersection (clusters el1) (clusters el2))))))
-    (map (partial apply (partial multi-precision categories clusters)))
+    (filter (fn [[ el1 el2]] (seq (set/intersection (clusters el1) (clusters el2)))))
+    (map (fn [[el1 el2]] (multi-precision categories clusters el1 el2)))
   )
 )
 

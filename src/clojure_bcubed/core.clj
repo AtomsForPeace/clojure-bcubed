@@ -6,9 +6,8 @@
         [clojure.math.combinatorics :as combo])
     (:gen-class))
 
-(def state (atom { :sum 0, :n 0 }))
+(set! *unchecked-math* :warn-on-boxed)
 
-; better way(?): build averager as reducing function using an atom to keep state
 (defn averager-factory []
   (fn
     (
@@ -17,11 +16,10 @@
     )
     (
       [state]
-      ;(/ (@state :sum) (@state :n))
       state
     )
     (
-      [[sum n] number]
+      [[^double sum ^long n] ^double number]
       [ (+ sum number) (inc n) ]
     )
   )
@@ -72,9 +70,9 @@
   (let [
     partitions (partition-all 10000 (combo/selections (keys clusters) 2))
     transducer (partial transduce (recall-xform categories clusters) (averager-factory))
-    result (apply mapv + (pmap transducer partitions))
+    [^double sum ^long n] (apply mapv + (pmap transducer partitions))
     ]
-    (/ (first result) (second result))
+    (/ sum n)
   )
 )
 
